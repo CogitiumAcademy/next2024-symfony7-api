@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+
+  php:
+    build:
+      context: ./php
+    container_name: php82
+    ports:
+      - 8000:80
+    volumes:
+      - ./app:/var/www
+      - ./apache/default.conf:/etc/apache2/sites-enabled/000-default.conf
+    # Pour lancer terminal : docker-compose exec php /bin/bash (ou bash)
+
