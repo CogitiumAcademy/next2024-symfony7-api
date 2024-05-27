@@ -28,3 +28,7 @@ myapi:
         namespace: App\Controller\Myapi
     type: attribute
     prefix: /
+
+auth:
+    path: /auth
+    methods: ['POST']

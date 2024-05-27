@@ -26,7 +26,7 @@ class MyapiController extends AbstractController
     {
         $users = $ur->findAll();
         //dd($users);
-        return $this->json($users, Response::HTTP_OK);
+        return $this->json($users, Response::HTTP_OK, [], ["groups" => "read.user.collection"]);
     }
 
     #[Route('/users/{id}', name: 'user', methods: ['GET'])]
