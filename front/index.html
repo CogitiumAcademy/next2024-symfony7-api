@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Titre</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+    <!-- FontAwesome core CSS -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+    <link rel="stylesheet" href="">
+    <style>
+        #loader img {
+            width: 200px;
+        }
+        #loader {
+            width: 100%;
+            justify-content: center;
+            margin: auto;
+        }
+    </style>
+
+  </head>
+
+  <body>
+
+    <div class="container">
+        <h1>API Frontend</h1>
+        <nav>
+            <button id="button_posts">Posts</button>
+            <button id="button_post">Post + id</button>
+            <button id="button_tags">Tags</button>
+            <button id="button_users" style="display: none">Users</button>
+            <button id="button_login">Login</button>
+            <button id="button_logout" style="display: none">Logout</button>
+        </nav>
+        <div id="loader" style="display:none"><img src="loader.gif" alt=""></div>
+        <div id="root"></div>
+    </div>
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>    
+
+    <script>
+    
+    // Quelques explications sur les appels API en JavaScript : https://www.freecodecamp.org/french/news/effectuer-des-requetes-http-dans-javascript/
+
+    window.onload = function () {
+
+        function createNode(element) {
+            return document.createElement(element);
+        }
+
+        function append(parent, el) {
+            return parent.appendChild(el);
+        }
+
+        const token = localStorage.getItem('token')
+        if (token != 'null') {
+            document.getElementById("button_users").style.display = "inline"
+            document.getElementById("button_logout").style.display = "inline"
+            document.getElementById("button_login").style.display = "none"
+        }
+
+        //const api = 'https://argentik.herokuapp.com/api'
+        const api = 'http://localhost:8000'
+
+        const root = document.getElementById('root');
+
+        document.getElementById("button_posts").addEventListener("click", function(){
+            
+            console.log('BEGIN POSTS')
+
+            document.getElementById('root').innerHTML = ""
+            document.getElementById("loader").style.display = "block"
+
+            const url = api + "/api/posts"
+            
+            fetch(url)
+
+            .then(response => {
+                console.log("Response = " , response)
+                return response.json()
+            })
+
+            .then(data => {
+                console.log("Data = " , data)
+                document.getElementById("loader").style.display = "none"
+                
+                let posts = data["hydra:member"]
+                console.log("Posts =" , posts)
+
+                let last = data["hydra:view"]["hydra:last"]
+                console.log("Last =", last)
+                let a_last = createNode('a')
+                a_last.innerHTML = 'Last'
+                a_last.href = api + data["hydra:view"]["hydra:last"]
+                append(root, a_last)
+
+                let nb = data["hydra:totalItems"]
+                let h2 = createNode('h2')
+                h2.innerHTML = `Les derniers articles (Total articles = ${nb})`
+                append(root, h2)
+                
+                return posts.map(function(post) {
+                    let h3 = createNode('h3');
+                    let div = createNode('div');
+                    h3.innerHTML = `${post.title}`;
+                    div.innerHTML = `${post.slug}`;
+                    append(root, h3);
+                    append(root, div);
+                })
+            })
+
+            .catch(error => {
+                console.log("Error : " , error)
+                alert("Error : " + error)
+            });
+
+            console.log('END POSTS')
+
+        })
+
+        document.getElementById("button_post").addEventListener("click", function(){
+            
+            console.log('BEGIN POST ID')
+
+            document.getElementById('root').innerHTML = ""
+            document.getElementById("loader").style.display = "block"
+
+            const id = prompt('Numéro du Post')
+
+            const url = api + "/api/posts/" + id
+
+
+            fetch(url)
+
+            .then(response => {
+                console.log("Response = " , response)
+                return response.json()
+            })
+
+            .then(data => {
+                console.log("Data = " , data)
+                document.getElementById("loader").style.display = "none"
+                
+                let post = data
+                console.log("Post =" , post)
+
+                let h3 = createNode('h3');
+                let h4 = createNode('h4');
+                let p = createNode('p');
+                h3.innerHTML = `${post.title}`;
+                h4.innerHTML = `Slug = ${post.slug}`;
+                p.innerHTML = `${post.content}`;
+                append(root, h3);
+                append(root, h4);
+                append(root, p);
+            })
+
+            .catch(error => {
+                console.log("Error : " , error)
+                alert("Error : " + error)
+            });
+
+            console.log('END POST ID')
+
+        })
+
+        document.getElementById("button_tags").addEventListener("click", function(){
+            
+            console.log('BEGIN TAGS')
+
+            document.getElementById('root').innerHTML = ""
+            document.getElementById("loader").style.display = "block"
+
+            const url = api + "/api/tags"
+
+            fetch(url)
+
+            .then(response => {
+                console.log("Response : " , response)
+                return response.json()
+            })
+
+            .then(data => {
+                console.log("Data = " , data)
+                document.getElementById("loader").style.display = "none"
+                let tags = data["hydra:member"]
+                console.log("Tags = " , tags)
+
+                let h2 =createNode('h2')
+                h2.innerHTML = 'Liste des tags'
+                append(root, h2)
+                let ul = createNode('ul');
+                append(root, ul);
+                
+                return tags.map(function(tag) {
+                    let li = createNode('li');
+                    li.innerHTML = `Name = ${tag.name}`;
+                    append(ul, li);
+                })
+            })
+
+            .catch(error => {
+                console.log("Error : " , error)
+                alert("Error : " + error)
+            });
+
+            console.log('END TAGS')
+
+        })
+
+        document.getElementById("button_users").addEventListener("click", function(){
+            
+            console.log('BEGIN USERS')
+
+            document.getElementById('root').innerHTML = ""
+            document.getElementById("loader").style.display = "block"
+
+            const url = api + "/api/users"
+
+            const token = localStorage.getItem('token')
+            console.log("Token Local storage = " , token)
+
+            fetch(url, {
+                headers: {
+                    'content-type': 'application/json',
+                    'authorization': 'Bearer ' + token
+                }
+            })
+
+            .then(response => {
+                console.log("Response = " , response)
+                if(response.status!==200)
+                {
+                    document.getElementById("loader").style.display = "none"
+                    throw new Error(response.status)
+                }
+                return response.json()
+            })
+
+            .then(data => {
+                console.log("Data = " , data)
+                document.getElementById("loader").style.display = "none"
+                let users = data["hydra:member"]
+                console.log("Users = " , users)
+
+                let h2 =createNode('h2')
+                h2.innerHTML = 'Liste des utilisateurs'
+                append(root, h2)
+                let ul = createNode('ul');
+                append(root, ul);
+                
+                return users.map(function(user) {
+                    let li = createNode('li');
+                    li.innerHTML = `Name = ${user.username} - Email = ${user.email} - Roles = ${user.roles}`;
+                    append(ul, li);
+                })
+            })
+
+            .catch(error => {
+                console.log("Error : " , error)
+                alert("Error : " + error)
+            });
+
+            console.log('END USERS')
+
+        })
+
+        document.getElementById("button_login").addEventListener("click", function(){
+            
+            console.log('BEGIN LOGIN')
+
+            const url = api + "/auth"
+
+            const email = prompt('Identifiant')
+            const password = prompt('Password')
+            //const email = "jane_admin"
+            //const password = "kitten"
+
+            fetch(url, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                method: 'POST',
+                //body: JSON.stringify({ email: 'test2@test.com', 'password': '123456' })
+                body: JSON.stringify({ email: email, 'password': password })
+            })
+            
+            .then(response => {
+                console.log("Response = " , response)
+                if(response.status==200)
+                {
+                    document.getElementById("button_users").style.display = "inline"
+                    document.getElementById("button_logout").style.display = "inline"
+                    document.getElementById("button_login").style.display = "none"
+                }
+                return response.json()
+            })
+
+            .then(data => {
+                console.log("Data = " , data)
+                console.log("Token = " , data.token)
+                localStorage.setItem('token', data.token)
+            })
+
+            .catch(error => {
+                console.log("Error : " , error)
+                alert("Error : " + error)
+            });
+
+            console.log('END LOGIN')
+
+        })
+
+        document.getElementById("button_logout").addEventListener("click", function(){
+            
+            console.log('BEGIN LOGOUT')
+
+            localStorage.setItem('token', null)
+            document.getElementById("button_users").style.display = "none"
+            document.getElementById("button_login").style.display = "inline"
+            document.getElementById("button_logout").style.display = "none"
+
+            console.log('END LOGOUT')
+
+        })
+    }
+
+    </script>
+
+  </body>
+
+</html>

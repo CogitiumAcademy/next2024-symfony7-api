@@ -14,6 +14,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata\Get;
 use Doctrine\DBAL\Types\Types;
 use ApiPlatform\Metadata\Patch;
+use App\Controller\MeController;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use ApiPlatform\Metadata\ApiResource;
@@ -40,8 +41,13 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 //#[Get]
 #[Get]
 #[Patch(security: "is_granted('ROLE_ADMIN') or object == user")]
-#[GetCollection(normalizationContext: ['groups' => ['read:user:collection']])]
+//#[GetCollection(normalizationContext: ['groups' => ['read:user:collection']])]
 //#[\ApiPlatform\Metadata\Post(security: "is_granted('ROLE_ADMIN')")]
+#[GetCollection(
+    uriTemplate: "/me",
+    controller: MeController::class,
+    security: "is_granted('ROLE_USER')",
+    name: 'me')]
 #[\ApiPlatform\Metadata\Post]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {

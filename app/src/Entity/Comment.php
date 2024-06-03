@@ -19,6 +19,7 @@ use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
 use function Symfony\Component\String\u;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -60,14 +61,17 @@ class Comment
     #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank(message: 'comment.blank')]
     #[Assert\Length(min: 5, minMessage: 'comment.too_short', max: 10000, maxMessage: 'comment.too_long')]
+    #[Groups(['read:post:item'])]
     private ?string $content = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['read:post:item'])]
     private \DateTime $publishedAt;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
     //private ?User $author = null;
+    #[Groups(['read:post:item'])]
     public ?User $author = null;
 
     public function __construct()

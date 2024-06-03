@@ -16,17 +16,22 @@ use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/myapi', name: 'my_api_')]
 class MyapiController extends AbstractController
 {
     #[Route('/users', name: 'users', methods: ['GET'])]
-    public function users(UserRepository $ur): JsonResponse
+    public function users(UserRepository $ur, SerializerInterface $serializer): JsonResponse
     {
         $users = $ur->findAll();
         //dd($users);
-        return $this->json($users, Response::HTTP_OK, [], ["groups" => "read.user.collection"]);
+        $json = $serializer->serialize($users, 'json', ['groups' => 'read:user:collection']);
+        //dd($json);
+        //dd($this->json($users, Response::HTTP_OK, [], ["groups" => "read.user.collection"]));
+        return new JsonResponse($json, Response::HTTP_OK, ['Content-Type' => 'application/ld+json'], true);
+        //return $this->json($users, Response::HTTP_OK, [], ["groups" => "read.user.collection"]);
     }
 
     #[Route('/users/{id}', name: 'user', methods: ['GET'])]
